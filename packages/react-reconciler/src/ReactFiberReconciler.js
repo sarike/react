@@ -319,10 +319,12 @@ export function getPublicRootInstance(
   if (!containerFiber.child) {
     return null;
   }
+  // ReactDOM.render 流程中 containerFiber.child.tag 初始值为 HostRoot = 3，在 ReactWorkTags.js:34
   switch (containerFiber.child.tag) {
     case HostComponent:
       return getPublicInstance(containerFiber.child.stateNode);
     default:
+      // 初始值为 null
       return containerFiber.child.stateNode;
   }
 }

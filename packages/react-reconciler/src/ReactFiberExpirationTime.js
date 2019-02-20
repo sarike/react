@@ -21,6 +21,7 @@ const MAGIC_NUMBER_OFFSET = MAX_SIGNED_31_BIT_INT - 1;
 // 1 unit of expiration time represents 10ms.
 export function msToExpirationTime(ms: number): ExpirationTime {
   // Always add an offset so that we don't clash with the magic number for NoWork.
+  // 2**30 - 1 - (now / 10)
   return MAGIC_NUMBER_OFFSET - ((ms / UNIT_SIZE) | 0);
 }
 

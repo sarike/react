@@ -1593,6 +1593,7 @@ function computeUniqueAsyncExpiration(): ExpirationTime {
 }
 
 function computeExpirationForFiber(currentTime: ExpirationTime, fiber: Fiber) {
+  // 默认值：NormalPriority = 3;
   const priorityLevel = getCurrentPriorityLevel();
 
   let expirationTime;
@@ -2049,13 +2050,16 @@ function requestCurrentTime() {
   // In other words, because expiration times determine how updates are batched,
   // we want all updates of like priority that occur within the same event to
   // receive the same expiration time. Otherwise we get tearing.
+  // 过期时间决定了如何进行批量更新，优先级比较接近的更新拥有相同的过期时间。
   //
   // We keep track of two separate times: the current "renderer" time and the
   // current "scheduler" time. The renderer time can be updated whenever; it
   // only exists to minimize the calls performance.now.
+  // renderer time 存在的意义是为了降低 performance.now 的调用次数，提高性能
   //
   // But the scheduler time can only be updated if there's no pending work, or
   // if we know for certain that we're not in the middle of an event.
+  // schedulerTime 只有在没有 pending work 或者确定不在事件中时才更新
 
   if (isRendering) {
     // We're already rendering. Return the most recently read time.
@@ -2134,16 +2138,19 @@ function addRootToSchedule(root: FiberRoot, expirationTime: ExpirationTime) {
     }
   }
 }
-
+// 找到最高优先级的 Root, root.expirationTime 越大优先级越高
+// 读到这里暂且认为 expirationTime 是当前帧的剩余时间
 function findHighestPriorityRoot() {
   let highestPriorityWork = NoWork;
   let highestPriorityRoot = null;
   if (lastScheduledRoot !== null) {
+    // 循环单向链表
     let previousScheduledRoot = lastScheduledRoot;
     let root = firstScheduledRoot;
     while (root !== null) {
       const remainingExpirationTime = root.expirationTime;
       if (remainingExpirationTime === NoWork) {
+        // 如果剩余过期时间 === 0，认为当前 root 不会再工作？
         // This root no longer has work. Remove it from the scheduler.
 
         // TODO: This check is redudant, but Flow is confused by the branch
@@ -2155,8 +2162,9 @@ function findHighestPriorityRoot() {
             'caused by a bug in React. Please file an issue.',
         );
         if (root === root.nextScheduledRoot) {
+          // 只有一个 root，清空链表
           // This is the only root in the list.
-          root.nextScheduledRoot = null;
+          root.nextScheduledRoot = null; // 释放 root 的 next 引用
           firstScheduledRoot = lastScheduledRoot = null;
           break;
         } else if (root === firstScheduledRoot) {
@@ -2170,11 +2178,13 @@ function findHighestPriorityRoot() {
           lastScheduledRoot = previousScheduledRoot;
           lastScheduledRoot.nextScheduledRoot = firstScheduledRoot;
           root.nextScheduledRoot = null;
-          break;
+          break; // break 的原因是前面 Root 的优先级肯定比最后一个更低
         } else {
+          // 中间位置
           previousScheduledRoot.nextScheduledRoot = root.nextScheduledRoot;
           root.nextScheduledRoot = null;
         }
+        // 重新设置 root 的引用
         root = previousScheduledRoot.nextScheduledRoot;
       } else {
         if (remainingExpirationTime > highestPriorityWork) {
@@ -2185,6 +2195,7 @@ function findHighestPriorityRoot() {
         if (root === lastScheduledRoot) {
           break;
         }
+        // 最高优先级
         if (highestPriorityWork === Sync) {
           // Sync is highest priority by definition so
           // we can stop searching.
