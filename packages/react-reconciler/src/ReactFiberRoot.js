@@ -105,6 +105,7 @@ export type FiberRoot = {
   ...ProfilingOnlyFiberRootProperties,
 };
 
+// container._reactRootContainer._internalRoot 的值为该方法返回的结果
 export function createFiberRoot(
   containerInfo: any,
   isConcurrent: boolean,

@@ -419,7 +419,9 @@ export function createWorkInProgress(
 }
 
 export function createHostRootFiber(isConcurrent: boolean): Fiber {
-  let mode = isConcurrent ? ConcurrentMode | StrictMode : NoContext;
+  let mode = isConcurrent
+    ? ConcurrentMode | StrictMode // 0b001 | ob010 = 0b011
+    : NoContext; // 0b000
 
   if (enableProfilerTimer && isDevToolsPresent) {
     // Always collect profile timings when DevTools are present.

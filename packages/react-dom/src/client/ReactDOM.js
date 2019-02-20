@@ -104,6 +104,7 @@ if (__DEV__) {
   }
 
   topLevelUpdateWarnings = (container: DOMContainer) => {
+    // container._reactRootContainer 初次挂载时为 null，561 行
     if (container._reactRootContainer && container.nodeType !== COMMENT_NODE) {
       const hostInstance = findHostInstanceWithNoPortals(
         container._reactRootContainer._internalRoot.current,
@@ -475,6 +476,8 @@ function getReactRootElementInContainer(container: any) {
   }
 }
 
+// 启发式判断是否需要注水
+// 如果 rootElement 存在且包含属性 data-reactroot
 function shouldHydrateDueToLegacyHeuristic(container) {
   const rootElement = getReactRootElementInContainer(container);
   return !!(
@@ -538,9 +541,13 @@ function legacyCreateRootFromDOMContainer(
 }
 
 function legacyRenderSubtreeIntoContainer(
+  // 父组件，ReacDOM.render 中调用时为 null
   parentComponent: ?React$Component<any, any>,
+  // ReactDOM.render 中调用时为要挂载的组件
   children: ReactNodeList,
+  // 要渲染到的 DOM 容器
   container: DOMContainer,
+  // 是否需要注水，ReactDOM.render 中调用时为 false
   forceHydrate: boolean,
   callback: ?Function,
 ) {
