@@ -104,6 +104,7 @@ function getContextForSubtree(
 
   if (fiber.tag === ClassComponent) {
     const Component = fiber.type;
+    // 通过判断 childContentTypes 不为 null | undefined 来判断是否使用旧的 contextApi
     if (isLegacyContextProvider(Component)) {
       return processChildContext(fiber, Component, parentContext);
     }
@@ -136,6 +137,16 @@ function scheduleRootUpdate(
     }
   }
 
+  /**
+   * {
+   *   expirationTime: expirationTime,
+   *   tag: UpdateState,  // 0
+   *   payload: null,
+   *   callback: null,
+   *   next: null,
+   *   nextEffect: null,
+   * };
+   */
   const update = createUpdate(expirationTime);
   // Caution: React DevTools currently depends on this property
   // being called "element".
@@ -319,12 +330,10 @@ export function getPublicRootInstance(
   if (!containerFiber.child) {
     return null;
   }
-  // ReactDOM.render 流程中 containerFiber.child.tag 初始值为 HostRoot = 3，在 ReactWorkTags.js:34
   switch (containerFiber.child.tag) {
     case HostComponent:
       return getPublicInstance(containerFiber.child.stateNode);
     default:
-      // 初始值为 null
       return containerFiber.child.stateNode;
   }
 }

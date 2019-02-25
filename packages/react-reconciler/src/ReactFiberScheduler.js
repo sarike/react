@@ -598,6 +598,9 @@ function markLegacyErrorBoundaryAsFailed(instance: mixed) {
 
 function flushPassiveEffects() {
   if (passiveEffectCallbackHandle !== null) {
+    // passiveEffectCallbackHandle 是 callbackNode
+    // callbackNode 在 Scheduler 中作为元素维护在一个单项循环链表中
+    // 下面的方法是将指定的节点从链表中移除
     cancelPassiveEffects(passiveEffectCallbackHandle);
   }
   if (passiveEffectCallback !== null) {

@@ -363,11 +363,13 @@ ReactWork.prototype._onCommit = function(): void {
   }
 };
 
+// container._reactRootContainer 的值就是该类的实例
 function ReactRoot(
   container: DOMContainer,
   isConcurrent: boolean,
   hydrate: boolean,
 ) {
+  // 包含了一大堆属性的对象
   const root = createContainer(container, isConcurrent, hydrate);
   this._internalRoot = root;
 }
@@ -382,7 +384,7 @@ ReactRoot.prototype.render = function(
     warnOnInvalidCallback(callback, 'render');
   }
   if (callback !== null) {
-    work.then(callback);
+    work.then(callback); // 如果 work 已经被提交，则立即执行，否则 callback 会放到 work 的回调数组中，在 commit 的时候一起执行
   }
   updateContainer(children, root, null, work._onCommit);
   return work;
@@ -477,7 +479,7 @@ function getReactRootElementInContainer(container: any) {
 }
 
 // 启发式判断是否需要注水
-// 如果 rootElement 存在且包含属性 data-reactroot
+// 如果 rootElement 存在且包含属性 data-reactroot，则认为是 Server render，需要注水
 function shouldHydrateDueToLegacyHeuristic(container) {
   const rootElement = getReactRootElementInContainer(container);
   return !!(
@@ -525,6 +527,7 @@ function legacyCreateRootFromDOMContainer(
     }
   }
   if (__DEV__) {
+    // 注水警告：在 v17 中将不会在 ReactDOM.render() 的过程中注水，最好直接使用 ReactDOM.hydrate() 代替
     if (shouldHydrate && !forceHydrate && !warnedAboutHydrateAPI) {
       warnedAboutHydrateAPI = true;
       lowPriorityWarning(
