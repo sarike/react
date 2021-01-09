@@ -101,12 +101,17 @@ function getReactRootElementInContainer(container: any) {
   }
 }
 
+// 探索判断是否需要注水
 function shouldHydrateDueToLegacyHeuristic(container) {
+  /**
+   * 1. container 是 document 节点则使用该节点
+   * 2. 否则使用第一个子节点
+   */
   const rootElement = getReactRootElementInContainer(container);
   return !!(
     rootElement &&
     rootElement.nodeType === ELEMENT_NODE &&
-    rootElement.hasAttribute(ROOT_ATTRIBUTE_NAME)
+    rootElement.hasAttribute(ROOT_ATTRIBUTE_NAME /** data-reactroot */)
   );
 }
 
@@ -306,10 +311,10 @@ export function render(
     }
   }
   return legacyRenderSubtreeIntoContainer(
-    null,
-    element,
+    null, // parentComponent
+    element, // children
     container,
-    false,
+    false, // forceHydrate
     callback,
   );
 }

@@ -392,6 +392,7 @@ export function requestEventTime() {
     return currentEventTime;
   }
   // This is the first update since React yielded. Compute a new start time.
+  // 首次挂载
   currentEventTime = now();
   return currentEventTime;
 }

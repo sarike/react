@@ -248,16 +248,16 @@ export function createContainer(
 }
 
 export function updateContainer(
-  element: ReactNodeList,
-  container: OpaqueRoot,
+  element: ReactNodeList, // React 组件
+  container: OpaqueRoot, // FiberRoot
   parentComponent: ?React$Component<any, any>,
   callback: ?Function,
 ): Lane {
   if (__DEV__) {
     onScheduleRoot(container, element);
   }
-  const current = container.current;
-  const eventTime = requestEventTime();
+  const current = container.current; // FiberNode
+  const eventTime = requestEventTime(); // 首次挂载时是 now()
   if (__DEV__) {
     // $FlowExpectedError - jest isn't a global, and isn't recognized outside of tests
     if ('undefined' !== typeof jest) {
@@ -265,12 +265,13 @@ export function updateContainer(
       warnIfNotScopedWithMatchingAct(current);
     }
   }
-  const lane = requestUpdateLane(current);
+  const lane = requestUpdateLane(current); // 首次渲染时为：SyncLane
 
   if (enableSchedulingProfiler) {
     markRenderScheduled(lane);
   }
 
+  // 首次渲染时为 {}
   const context = getContextForSubtree(parentComponent);
   if (container.context === null) {
     container.context = context;
